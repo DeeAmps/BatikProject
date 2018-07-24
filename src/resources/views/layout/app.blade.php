@@ -16,6 +16,9 @@
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/css/bootstrap.min.css" rel="stylesheet" type="text/css">
     <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.11.1/build/css/alertify.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.11.1/build/css/themes/default.min.css"/>
+    <link href="{{ asset('css/magnific-popup.css') }}" rel="stylesheet">
     <style>
         label, input { display:block; }
         input.text { margin-bottom:12px; width:95%; padding: .4em; }
@@ -75,9 +78,26 @@
                     <li class="nav-item {{ (\Request::route()->getName() == 'admin') ? 'active' : '' }}">
                         <a class="nav-link" href="{{ url("admin") }}">Orders</a>
                     </li>
+                    @endguest
+            </ul>
+            <form class="form-inline my-2 my-lg-0">
+                <a class="btn btn-success btn-sm ml-3" href="{{ url("cart") }}">
+                    <i class="fa fa-shopping-cart"></i> Cart
+                    <span id="cartCount" class="badge badge-light"></span>
+                </a>
+                <a id="checkout" onclick="proceedToCheckOut()" style="display: none" class="btn btn-warning btn-sm ml-3">
+                    <i class="fa fa-check"></i> Check Out
+                </a>
+            </form>
+        </div>
+        <div class="my-2 my-lg-0" style="margin-left: 70px;">
+            <ul class="navbar-nav mr-auto">
+                @guest
+
+                @else
                     <li class="nav-item dropdown">
-                        <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
-                            {{ Auth::user()->name }} <span class="caret"></span>
+                        <a style="color: #FFFFFF;" id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
+                           Welcome, {{ Auth::user()->name }} <span class="caret"></span>
                         </a>
 
                         <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
@@ -94,43 +114,6 @@
                     </li>
                     @endguest
             </ul>
-
-            {{--<ul class="navbar-nav mr-auto">--}}
-                {{--<!-- Authentication Links -->--}}
-                {{--@guest--}}
-                {{--<li class="nav-item">--}}
-                    {{--<a class="nav-link" href="{{ route('login') }}">{{ __('Login') }}</a>--}}
-                {{--</li>--}}
-                {{--@else--}}
-                    {{--<li class="nav-item dropdown">--}}
-                        {{--<a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>--}}
-                            {{--{{ Auth::user()->name }} <span class="caret"></span>--}}
-                        {{--</a>--}}
-
-                        {{--<div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">--}}
-                            {{--<a class="dropdown-item" href="{{ route('logout') }}"--}}
-                               {{--onclick="event.preventDefault();--}}
-                                                     {{--document.getElementById('logout-form').submit();">--}}
-                                {{--{{ __('Logout') }}--}}
-                            {{--</a>--}}
-
-                            {{--<form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">--}}
-                                {{--@csrf--}}
-                            {{--</form>--}}
-                        {{--</div>--}}
-                    {{--</li>--}}
-                    {{--@endguest--}}
-            {{--</ul>--}}
-
-            <form class="form-inline my-2 my-lg-0">
-                <a class="btn btn-success btn-sm ml-3" href="{{ url("cart") }}">
-                    <i class="fa fa-shopping-cart"></i> Cart
-                    <span id="cartCount" class="badge badge-light"></span>
-                </a>
-                <a id="checkout" onclick="proceedToCheckOut()" style="display: none" class="btn btn-warning btn-sm ml-3">
-                    <i class="fa fa-check"></i> Check Out
-                </a>
-            </form>
         </div>
     </div>
 </nav>
@@ -139,6 +122,7 @@
         <div class="container">
             <h1 class="jumbotron-heading"><strong>Company Name @yield('title')</strong></h1>
             <hr>
+            @include("includes.flash")
             <img style="height: 320px !important;" class="d-block w-100" src=" {{asset('images/carousel/3.jpeg') }}" alt="">
             <hr>
             <p class="lead text-muted mb-0">
@@ -146,9 +130,11 @@
             </p>
 
         </div>
-        @include("includes.flash")
     </section>
     @yield('content')
+</div>
+
+<div id="my-popup" class="mfp-hide white-popup">
 </div>
 
 <footer class="text-light">
@@ -187,6 +173,9 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.11.1/build/alertify.min.js"></script>
+<script src="{{ asset("js/sha512.min.js")  }}"></script>
+<script src="{{ asset("js/magnific-popup.min.js")  }}"></script>
 @yield("script")
 <script>
     $("#checkoutForm").submit(function(){
@@ -202,9 +191,19 @@
     })
 
     $(document).ready(function(){
+        $('.viewImage').magnificPopup({
+            type: 'image' // this is a default type
+        });
+
+        var status = "{!! session("status") !!}";
+        if(status != ""){
+            $("#cartTable").append("<p class='text-center lead'>You have no Items in your Cart</p>");
+            localStorage.removeItem("cartItems");
+        }
+
        var cartItems = localStorage.getItem("cartItems");
        var attr = "";
-       if(cartItems == null || JSON.stringify(cartItems).length == 0){
+       if(cartItems == null || JSON.parse(cartItems).length == 0){
            cartItems = [];
            $("#cartCount").text(cartItems.length);
            attr = "none";
@@ -217,6 +216,14 @@
        }
         $("#checkout").css("display", attr);
     });
+
+        $('.viewImage').magnificPopup({
+            type: 'image' // this is a default type
+        });
+
+    function clearStorage(){
+        console.log("HERE");
+    }
 
     function addToCart(cart){
         var cartItems = JSON.parse(localStorage.getItem("cartItems"));
@@ -247,5 +254,6 @@
     }
     @yield("contact_script")
 </script>
+@yield("adminScript")
 </body>
 </html>

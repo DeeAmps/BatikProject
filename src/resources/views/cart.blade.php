@@ -6,7 +6,6 @@
     <div class=" mt-3 mb-4" style="margin-left: 10px; margin-right: 10px">
         <div class="row">
             <div class="col-sm">
-                @include("includes.flash")
                 <div class="card">
                     <div class="card-header bg-primary text-white text-uppercase text-center">
                         <i class="fa fa-shopping-cart"></i> Selected Products  <h3 >Total Amount : GHC <span style="color: red" id="cartTotal"></span></h3>
@@ -31,13 +30,17 @@
     </div>
 @endsection
 
-
+@yield("clearLocalStorage")
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
 <script>
     $(document).ready(function(){
+        var status = "{!! session("status") !!}";
+        if(status != ""){
+            localStorage.removeItem("cartItems");
+        }
         renderItems();
     })
 

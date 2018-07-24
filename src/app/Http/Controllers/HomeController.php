@@ -45,17 +45,19 @@ class HomeController extends Controller
             'name' => 'required|max:50',
             'phone' => 'required|max:10'
         ]);
-        $pending = new PendingOrders();
         $cart = get_object_vars(json_decode(($request["cart"])));
-        foreach ($cart as $key=>$value){
-            $pending->order_path = $key;
-            $pending->order_price = $value;
-            $pending->name = $request["name"];
-            $pending->phone = $request["phone"];
-            $pending->pending = 1;
-            $pending->created_at = Carbon::now();
+        $orders = [];
+        foreach($cart as $key=>$value){
+              array_push($orders, array(
+                    "order_path" => $key,
+                    "order_price" => $value,
+                    "name" => $request["name"],
+                    "phone" => str_replace(' ', '', $request["phone"]),
+                    "pending" => 1,
+                    "created_at" => Carbon::now()
+                ));
         }
-        $pending->save();
+        PendingOrders::insert($orders);
         return redirect()->back()->with("status", "Your Order has been sent successfully!");
 
     }

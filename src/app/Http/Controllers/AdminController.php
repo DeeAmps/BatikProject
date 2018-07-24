@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\PendingOrders;
 use Illuminate\Http\Request;
 
 class AdminController extends Controller
@@ -13,6 +14,8 @@ class AdminController extends Controller
 
     public function index()
     {
-        return view('admin');
+        $orders = PendingOrders::all()->where("pending", "=", "1")->groupBy("phone");
+        return view('admin', compact("orders"));
     }
+
 }

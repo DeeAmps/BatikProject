@@ -17,7 +17,7 @@
                                             <h4 class="card-title text-center item_price">GHC {{ $sale->price }}</h4>
                                             <div class="row">
                                                 <div class="col">
-                                                    <button onclick="openModal('{{ asset("images/onSale/" . $sale->path) }}')" class="btn btn-danger btn-block viewImage"><i class="fa fa-eye"></i>View</button>
+                                                    <a href="{{ asset("images/onSale/" . $sale->path) }}"  class="btn btn-danger btn-block viewImage"><i class="fa fa-eye"></i>View</a>
                                                 </div>
                                             </div>
                                             <br>
