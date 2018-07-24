@@ -11,4 +11,10 @@
 |
 */
 
-Route::get('/', "HomeController@Index");
+Route::get('/', "HomeController@index")->name("home");
+Route::post('/', 'HomeController@checkout')->name("checkout");
+Route::get('/contact', 'HomeController@contact')->name("contact");
+Route::post('/contact', 'HomeController@submitContact')->name("submit_message");
+Route::get('/cart', 'HomeController@cart')->name("cart");
+Route::post('/cart', 'HomeController@checkout')->name("checkout");
+

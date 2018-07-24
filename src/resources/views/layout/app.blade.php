@@ -16,9 +16,35 @@
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/css/bootstrap.min.css" rel="stylesheet" type="text/css">
     <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css">
-
+    <style>
+        label, input { display:block; }
+        input.text { margin-bottom:12px; width:95%; padding: .4em; }
+        fieldset { padding:0; border:0; margin-top:25px; }
+        h1 { font-size: 1.2em; margin: .6em 0; }
+        div#users-contain { width: 350px; margin: 20px 0; }
+        div#users-contain table { margin: 1em 0; border-collapse: collapse; width: 100%; }
+        div#users-contain table td, div#users-contain table th { border: 1px solid #eee; padding: .6em 10px; text-align: left; }
+        .ui-dialog .ui-state-error { padding: .3em; }
+        .validateTips { border: 1px solid transparent; padding: 0.3em; }
+    </style>
 </head>
 <body>
+<div id="dialog" style="display: none" title="Check Out">
+    <p class="validateTips">Please fill the fields and will be get back to you.</p>
+
+    <form method="post" action="">
+        {{csrf_field()}}
+        <fieldset>
+            <label for="name">Name</label>
+            <input required type="text" name="name" id="name"placeholder="John Doe" class="text ui-widget-content ui-corner-all">
+            <label for="email">Phone Number</label>
+            <input required type="text" name="phone"  placeholder="0241234321" class="text ui-widget-content ui-corner-all">
+            <!-- Allow form submission with keyboard without duplicating the dialog button -->
+            <button type="submit" class="btn btn-primary">Checkout</button>
+            <button  type="button" onclick="closeDialog()" class="btn btn-danger">Cancel</button>
+        </fieldset>
+    </form>
+</div>
 <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
     <div class="container">
         <a class="navbar-brand" href="index.html">Simple Ecommerce</a>
@@ -27,27 +53,70 @@
         </button>
 
         <div class="collapse navbar-collapse justify-content-end" id="navbarsExampleDefault">
-            <ul class="navbar-nav m-auto">
-                <li class="nav-item active">
-                    <a class="nav-link" href="category.html">Home <span class="sr-only">(current)</span></a>
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item {{ (\Request::route()->getName() == 'home') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ url("/") }}">Home <span class="sr-only">(current)</span></a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="cart.html">Cart</a>
+                <li class="nav-item {{ (\Request::route()->getName() == 'cart') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ url("cart") }}">Cart</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="contact.html">Contact</a>
+                <li class="nav-item {{ (\Request::route()->getName() == 'contact') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ url("contact") }}">Contact</a>
                 </li>
             </ul>
 
+            {{--<ul class="navbar-nav mr-auto">--}}
+                {{--<!-- Authentication Links -->--}}
+                {{--@guest--}}
+                {{--<li class="nav-item">--}}
+                    {{--<a class="nav-link" href="{{ route('login') }}">{{ __('Login') }}</a>--}}
+                {{--</li>--}}
+                {{--@else--}}
+                    {{--<li class="nav-item dropdown">--}}
+                        {{--<a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>--}}
+                            {{--{{ Auth::user()->name }} <span class="caret"></span>--}}
+                        {{--</a>--}}
+
+                        {{--<div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">--}}
+                            {{--<a class="dropdown-item" href="{{ route('logout') }}"--}}
+                               {{--onclick="event.preventDefault();--}}
+                                                     {{--document.getElementById('logout-form').submit();">--}}
+                                {{--{{ __('Logout') }}--}}
+                            {{--</a>--}}
+
+                            {{--<form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">--}}
+                                {{--@csrf--}}
+                            {{--</form>--}}
+                        {{--</div>--}}
+                    {{--</li>--}}
+                    {{--@endguest--}}
+            {{--</ul>--}}
+
             <form class="form-inline my-2 my-lg-0">
-                <a class="btn btn-success btn-sm ml-3" href="cart.html">
+                <a class="btn btn-success btn-sm ml-3" href="{{ url("cart") }}">
                     <i class="fa fa-shopping-cart"></i> Cart
-                    <span class="badge badge-light">3</span>
+                    <span id="cartCount" class="badge badge-light"></span>
+                </a>
+                <a id="checkout" onclick="proceedToCheckOut()" style="display: none" class="btn btn-warning btn-sm ml-3">
+                    <i class="fa fa-check"></i> Check Out
                 </a>
             </form>
         </div>
-    </div></nav>
+    </div>
+</nav>
 <div>
+    <section class="jumbotron text-center">
+        <div class="container">
+            <h1 class="jumbotron-heading"><strong>Company Name @yield('title')</strong></h1>
+            <hr>
+            <img style="height: 320px !important;" class="d-block w-100" src=" {{asset('images/carousel/3.jpeg') }}" alt="">
+            <hr>
+            <p class="lead text-muted mb-0">
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat
+            </p>
+
+        </div>
+    </section>
     @yield('content')
 </div>
 
@@ -61,28 +130,6 @@
                     Le Lorem Ipsum est simplement du faux texte employé dans la composition et la mise en page avant impression.
                 </p>
             </div>
-
-            {{--<div class="col-md-2 col-lg-2 col-xl-2 mx-auto">--}}
-                {{--<h5>Informations</h5>--}}
-                {{--<hr class="bg-white mb-2 mt-0 d-inline-block mx-auto w-25">--}}
-                {{--<ul class="list-unstyled">--}}
-                    {{--<li><a href="">Link 1</a></li>--}}
-                    {{--<li><a href="">Link 2</a></li>--}}
-                    {{--<li><a href="">Link 3</a></li>--}}
-                    {{--<li><a href="">Link 4</a></li>--}}
-                {{--</ul>--}}
-            {{--</div>--}}
-
-            {{--<div class="col-md-3 col-lg-2 col-xl-2 mx-auto">--}}
-                {{--<h5>Others links</h5>--}}
-                {{--<hr class="bg-white mb-2 mt-0 d-inline-block mx-auto w-25">--}}
-                {{--<ul class="list-unstyled">--}}
-                    {{--<li><a href="">Link 1</a></li>--}}
-                    {{--<li><a href="">Link 2</a></li>--}}
-                    {{--<li><a href="">Link 3</a></li>--}}
-                    {{--<li><a href="">Link 4</a></li>--}}
-                {{--</ul>--}}
-            {{--</div>--}}
 
             <div class="col-md-4 col-lg-3 col-xl-3">
                 <h5>Contact</h5>
@@ -109,21 +156,53 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-
+@yield("script")
 <script>
-//        function openModal(path){
-//            console.log(path);
-//            var modal = "<div id='dialog'>" +
-//                    "<p>" + "<img src='" + path + "'" + "/>" +
-//                    "</div>"
-//            $("body").append(modal);
-//            $( "#dialog" ).dialog({
-//                height: auto,
-//                width: auto,
-//                modal: true,
-//            });
-//
-//        }
+    $(document).ready(function(){
+       var cartItems = localStorage.getItem("cartItems");
+       var attr = "";
+       if(cartItems == null || JSON.parse(cartItems).length == 0){
+           cartItems = [];
+           $("#cartCount").text(cartItems.length);
+           attr = "none";
+           localStorage.setItem("cartItems", JSON.stringify(cartItems));
+       }
+       else{
+           $("#checkout").css("display", "inline");
+           attr = "inline";
+           addToCart("")
+       }
+        $("#checkout").css("display", attr);
+    });
+
+    function addToCart(cart){
+        var cartItems = JSON.parse(localStorage.getItem("cartItems"));
+        if(cart !== ""){
+            cartItems.push(cart);
+            $("#checkout").css("display", "inline");
+        }
+        $("#cartCount").text(cartItems.length);
+        localStorage.setItem("cartItems", JSON.stringify(cartItems))
+    }
+
+    function closeDialog(){
+        $("#dialog").dialog("close");
+    }
+
+    function proceedToCheckOut(){
+        var cartItems = JSON.parse(localStorage.getItem("cartItems"));
+        if(cartItems.length <= 0){
+            ("#checkout").css("display", "none");
+        }
+        else{
+            $("#dialog").dialog({
+                height: 400,
+                width: 400
+            });
+        }
+
+    }
+    @yield("contact_script")
 </script>
 </body>
 </html>
