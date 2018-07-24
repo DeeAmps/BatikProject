@@ -15,10 +15,11 @@ class CreatePendingOrdersTable extends Migration
     {
         Schema::create('pending_orders', function (Blueprint $table) {
             $table->increments('id');
-            $table->unsignedInteger('customer_id');
-            $table->unsignedInteger('order_id');
-            $table->foreign('customer_id')->references('id')->on('customers');
-            $table->foreign('order_id')->references('id')->on('on_sales');
+            $table->string('name');
+            $table->string('phone');
+            $table->string('order_path');
+            $table->double('order_price');
+            $table->boolean('pending');
             $table->timestamps();
         });
     }

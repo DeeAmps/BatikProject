@@ -6,6 +6,7 @@
     <div class=" mt-3 mb-4" style="margin-left: 10px; margin-right: 10px">
         <div class="row">
             <div class="col-sm">
+                @include("includes.flash")
                 <div class="card">
                     <div class="card-header bg-primary text-white text-uppercase text-center">
                         <i class="fa fa-shopping-cart"></i> Selected Products  <h3 >Total Amount : GHC <span style="color: red" id="cartTotal"></span></h3>
@@ -54,6 +55,17 @@
 </script>
 @section("script")
     <script>
+        $("#checkoutForm").submit(function(){
+            var cart = {};
+            var total = 0;
+            var items = JSON.parse(localStorage.getItem("cartItems"))
+            items.forEach(function(item){
+                let parsedItem = JSON.parse(item);
+                cart[parsedItem.path] = parsedItem.price;
+            })
+            $("#cartInput").val(JSON.stringify(cart))
+            return true
+        })
     function renderItems(){
         $("#cartTable").html("");
         var cartItems = JSON.parse(localStorage.getItem("cartItems"));

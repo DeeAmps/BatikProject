@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\onSale;
+use App\PendingOrders;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use function MongoDB\BSON\toJSON;
 
 class HomeController extends Controller
 {
@@ -26,7 +29,6 @@ class HomeController extends Controller
     {
         $images = onSale::all();
         $data = array("images" => $images)["images"];
-        //return response()->json($data, 200);
         return view("home", compact("data"));
     }
 
@@ -43,6 +45,18 @@ class HomeController extends Controller
             'name' => 'required|max:50',
             'phone' => 'required|max:10'
         ]);
-        return response()->json($request);
+        $pending = new PendingOrders();
+        $cart = get_object_vars(json_decode(($request["cart"])));
+        foreach ($cart as $key=>$value){
+            $pending->order_path = $key;
+            $pending->order_price = $value;
+            $pending->name = $request["name"];
+            $pending->phone = $request["phone"];
+            $pending->pending = 1;
+            $pending->created_at = Carbon::now();
+        }
+        $pending->save();
+        return redirect()->back()->with("status", "Your Order has been sent successfully!");
+
     }
 }

@@ -32,7 +32,7 @@
 <div id="dialog" style="display: none" title="Check Out">
     <p class="validateTips">Please fill the fields and will be get back to you.</p>
 
-    <form method="post" action="">
+    <form id="checkoutForm" method="post" action="">
         {{csrf_field()}}
         <fieldset>
             <label for="name">Name</label>
@@ -40,6 +40,7 @@
             <label for="email">Phone Number</label>
             <input required type="text" name="phone"  placeholder="0241234321" class="text ui-widget-content ui-corner-all">
             <!-- Allow form submission with keyboard without duplicating the dialog button -->
+            <input id="cartInput" type="hidden" name="cart">
             <button type="submit" class="btn btn-primary">Checkout</button>
             <button  type="button" onclick="closeDialog()" class="btn btn-danger">Cancel</button>
         </fieldset>
@@ -145,6 +146,7 @@
             </p>
 
         </div>
+        @include("includes.flash")
     </section>
     @yield('content')
 </div>
@@ -187,10 +189,22 @@
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 @yield("script")
 <script>
+    $("#checkoutForm").submit(function(){
+        var cart = {};
+        var total = 0;
+        var items = JSON.parse(localStorage.getItem("cartItems"))
+        items.forEach(function(item){
+            let parsedItem = JSON.parse(item);
+            cart[parsedItem.path] = parsedItem.price;
+        })
+        $("#cartInput").val(JSON.stringify(cart))
+        return true
+    })
+
     $(document).ready(function(){
        var cartItems = localStorage.getItem("cartItems");
        var attr = "";
-       if(cartItems == null || JSON.parse(cartItems).length == 0){
+       if(cartItems == null || JSON.stringify(cartItems).length == 0){
            cartItems = [];
            $("#cartCount").text(cartItems.length);
            attr = "none";
